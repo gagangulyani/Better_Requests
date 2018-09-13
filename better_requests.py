@@ -88,27 +88,27 @@ class BRequests():
                     break
 
                 except requests.exceptions.ConnectionError:
-                    print ("\nConnection Error.. Retrying",end="")
+                    print ("\nConnection Error.. \nRetrying",end="")
                     for i in range(3):
                         print (".",end="")
                         pause(1)
                     print("\n\n")
 
                 except requests.exceptions.ConnectTimeout:
-                    print ("\nConnection Timeout.. Retrying",end="")
+                    print ("\nConnection Timeout.. \nRetrying",end="")
                     for i in range(3):
                         print (".",end="")
                         pause(1)
                     print("\n\n")
 
                 except Exception as e:
-                    print ("\nSomething Went Wrong..Error: {} Retrying".format(e),end="")
+                    print ("\nSomething Went Wrong..Error: {}\nRetrying".format(e),end="")
                     for i in range(3):
                         print (".",end="")
                         pause(1)
                     print("\n\n")
-            else:
-                print ("\nCan't Get Content :(\n")
+                else:
+                    print ("\nCan't Get Content :(\n")
 
     def Download(self,link,show_progress=True,rep_files=True):
         """This method downloads file you want from the link user needs to provide.
@@ -116,15 +116,14 @@ class BRequests():
         Make Sure to add "show_progress=True" in argument while calling the method.
         """
         def dload(link,file_name,show_progress):
-            if show_progress==True:
-                print ("\nDownloading {}..".format(file_name))
+            file_=self.Get_Content(link,stream=True)
 
-                file_=self.Get_Content(link,stream=True)
+            if file_!=None:
+                if not file_.ok:
+                    print ("\nCan't Download File!\nResponse:\n{}".format(file_.content))
 
-                if file_!=None:
-                    if not file_.ok:
-                        print ("\nCan't Download File!\nResponse:\n{}".format(file_.content))
-                    else:
+                    if show_progress==True:
+                        print ("\nDownloading {}..".format(file_name))
                         total_length=file_.headers.get('content-length')
                         if total_length is None:
                             print ("\nCan't Show Progress Bar while Downloading it.. :|")
@@ -142,34 +141,35 @@ class BRequests():
                                             per=100.0 * (dl/total_length)
                                             print(("%.2f" % per)+"% "+"[%s%s]" % ('=' * done, ' ' * (50-done)),end="\r")
                                         print ("\nFile Downloaded Successfully!\n")
+                                        break
 
                                     except requests.exceptions.ConnectionError:
-                                        print ("\nConnection Error.. Retrying",end="")
+                                        print ("\nConnection Error.. \nRetrying",end="")
                                         for i in range(3):
                                             print (".",end="")
                                             pause(1)
                                         print("\n\n")
 
                                     except requests.exceptions.ConnectTimeout:
-                                        print ("\nConnection Timeout.. Retrying",end="")
+                                        print ("\nConnection Timeout.. \nRetrying",end="")
                                         for i in range(3):
                                             print (".",end="")
                                             pause(1)
                                         print("\n\n")
 
                                     except Exception as e:
-                                        print ("\nSomething Went Wrong..Error: {} Retrying".format(e),end="")
+                                        print ("\nSomething Went Wrong..Error: {}\nRetrying".format(e),end="")
                                         for i in range(3):
                                             print (".",end="")
                                             pause(1)
                                         print("\n\n")
+
                 else:
-                    print ("Can't Download File! :(")
-            else:
-                print("\nDownloading file..")
-                with open(file_name,"wb") as f:
-                    f.write(file_.raw)
-                print ("\nFile Downloaded Successfully!")
+                    print ("\nDownloading {}..".format(file_name))
+                    with open(file_name,"wb") as f:
+                        for data in file_.iter_content(chunk_size=4096):
+                            f.write(data)
+                    print ("\nFile Downloaded Successfully!\n")
 
         file_name=basename(link)
 
